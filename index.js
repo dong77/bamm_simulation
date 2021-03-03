@@ -34,8 +34,8 @@ class BAMM {
     	this.y = this.x * p;
     }
 
-    join(x, y, price) {
-    	console.assert(x !== 0 || y !== 0, 'invalid x or y');
+    join(Rx, Ry, price) {
+    	console.assert(Rx !== 0 || Ry !== 0, 'invalid x or y');
 
     	let p = price;
 
@@ -47,9 +47,9 @@ class BAMM {
 
     	let mint;
 		if (this.lp === 0) {
-    		mint = x*p + y;
+    		mint = Rx*p + Ry;
     	} else {
-    		mint = this.lp * (x*p + y) / (this.Rx*p + this.Ry);
+    		mint = this.lp * (Rx*p + Ry) / (this.Rx*p + this.Ry);
     	}
 
     	this.lp += mint;
@@ -57,7 +57,7 @@ class BAMM {
 
     	// transfer tokens into the pool
 
-    	this._rebanance(this.Rx + x, this.Ry + y, p)
+    	this._rebanance(this.Rx + Rx, this.Ry + Ry, p)
 
     	return mint;
     }
@@ -65,11 +65,11 @@ class BAMM {
     exit(lp) {
     	console.assert(lp <= this.lp);
     	let r = lp / this.lp;
-    	let x = this.Rx * r
-    	let y = this.Ry * r;
+    	let Rx = this.Rx * r
+    	let Ry = this.Ry * r;
 
- 		this.join(-x, -y, 0);
- 		return [x, y]
+ 		this.join(-Rx, -Ry, 0);
+ 		return [Rx, Ry]
     }
 
     sellX(x) { // buy y
