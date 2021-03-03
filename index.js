@@ -1,7 +1,7 @@
 class BAMM {
 
     constructor(F) {
-    	console.assert(F > 1);
+        console.assert(F > 1);
         this.F = F; // amplificaiton factor
         this.lp = 0;
         this.x = 0; // total X balance including virtual
@@ -11,11 +11,11 @@ class BAMM {
     }
 
     enabled() {
-    	return this.x > 0 && this.y > 0;
+        return this.x > 0 && this.y > 0;
     }
 
     _price() {
-    	return this.y/this.x;
+        return this.y/this.x;
     }
 
     price() {
@@ -24,79 +24,79 @@ class BAMM {
     }
 
     _rebanance(Rx, Ry, p) {
-    	this.Rx = Rx;
-    	this.Ry = Ry;
+        this.Rx = Rx;
+        this.Ry = Ry;
 
-    	let _x = this.Rx * this.F;
-    	let _y = this.Ry * this.F;
+        let _x = this.Rx * this.F;
+        let _y = this.Ry * this.F;
 
-    	this.x = Math.max(_x, _y/p);
-    	this.y = this.x * p;
+        this.x = Math.max(_x, _y/p);
+        this.y = this.x * p;
     }
 
     join(Rx, Ry, price) {
-    	console.assert(Rx !== 0 || Ry !== 0, 'invalid x or y');
+        console.assert(Rx !== 0 || Ry !== 0, 'invalid x or y');
 
-    	let p = price;
+        let p = price;
 
-    	if (this.enabled()) {
-    		p = this._price();
-    	} else {
-    		console.assert(p > 0, 'invalid price');
-    	}
+        if (this.enabled()) {
+            p = this._price();
+        } else {
+            console.assert(p > 0, 'invalid price');
+        }
 
-    	let mint;
-		if (this.lp === 0) {
-    		mint = Rx*p + Ry;
-    	} else {
-    		mint = this.lp * (Rx*p + Ry) / (this.Rx*p + this.Ry);
-    	}
+        let mint;
+        if (this.lp === 0) {
+            mint = Rx*p + Ry;
+        } else {
+            mint = this.lp * (Rx*p + Ry) / (this.Rx*p + this.Ry);
+        }
 
-    	this.lp += mint;
+        this.lp += mint;
 
 
-    	// transfer tokens into the pool
+        // transfer tokens into the pool
 
-    	this._rebanance(this.Rx + Rx, this.Ry + Ry, p)
+        this._rebanance(this.Rx + Rx, this.Ry + Ry, p)
 
-    	return mint;
+        return mint;
     }
 
     exit(lp) {
-    	console.assert(lp <= this.lp);
-    	let r = lp / this.lp;
-    	let Rx = this.Rx * r
-    	let Ry = this.Ry * r;
+        console.assert(lp <= this.lp);
+        let r = lp / this.lp;
+        let Rx = this.Rx * r
+        let Ry = this.Ry * r;
 
- 		this.join(-Rx, -Ry, 0);
- 		return [Rx, Ry]
+         this.join(-Rx, -Ry, 0);
+         return [Rx, Ry]
     }
 
-    sellX(x) { // buy y
-    	console.assert(this.enabled());
-    	let _x = this.x + x;
-    	let _y = this.x * this.y / _x;
-    	let y = this.y - _y;
-    	if (y > this.Ry) {
-    		y = this.Ry;
-    	}
+    sellX(Rx) { // buy Ry
+        console.assert(this.enabled());
+        let _x = this.x + Rx;
+        let _y = this.x * this.y / _x;
+        let Ry = this.y - _y;
+        if (Ry > this.Ry) {
+            Ry = this.Ry;
+        }
 
-    	_y = this.y - y;
-    	_x = this.x * this.y / _y;
-    	x = _x - this.x;
+        _y = this.y - Ry;
+        _x = this.x * this.y / _y;
+        Rx = _x - this.x;
 
-    	this.x = _x;
-    	this.y = _y;
+        this.x = _x;
+        this.y = _y;
 
 
-		this._rebanance(this.Rx + x, this.Ry - y, this._price());
+        this._rebanance(this.Rx + Rx, this.Ry - Ry, this._price());
 
-    	return [x, y];
+        return [Rx, Ry];
     }
 
 
     toString() {
-    	return `F = ${this.F}, x = ${this.x}, y = ${this.y}, Rx= ${this.Rx}, Ry= ${this.Ry}, p = ${this.price()}, lp = ${this.lp}`;
+        return `F = ${this.F}, x = ${this.x}, y = ${this.y}, Rx= ${this.Rx}, Ry= ${this.Ry}, p = ${this.price()}, lp = ${this.lp}`;
     }
 }
 
